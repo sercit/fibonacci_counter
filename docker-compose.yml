@@ -1,0 +1,42 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: "3.1"
+services:
+
+    redis:
+      image: redis:alpine
+      container_name: fibonacci-counter-redis
+
+    mysql:
+      image: mysql:8.0
+      container_name: fibonacci-counter-mysql
+      working_dir: /application
+      volumes:
+        - .:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=root_password
+        - MYSQL_DATABASE=fib_counter
+        - MYSQL_USER=fib_counter
+        - MYSQL_PASSWORD=fib_counter_password
+      ports:
+        - "49169:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: fibonacci-counter-webserver
+      working_dir: /application
+      volumes:
+          - .:/application
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+       - "49167:80"
+
+    php-fpm:
+      build: phpdocker/php-fpm
+      container_name: fibonacci-counter-php-fpm
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+
